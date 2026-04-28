@@ -2784,95 +2784,23 @@ input[type="number"]:focus, input[type="url"]:focus, textarea:focus, select:focu
         </div>
       </div>
 
-      <!-- Summary -->
+      <!-- Summary moved to top status banner; just keep the CTA -->
       <div class="wizard-summary" id="wizSummary">
-        <div class="wizard-summary-head">Sistem Ozeti</div>
-        <div class="wizard-summary-grid" id="wizSummaryGrid"></div>
+        <div class="wizard-summary-grid" id="wizSummaryGrid" style="display:none;"></div>
         <button class="btn-wizard-primary wizard-summary-cta" id="wizStartBtn" onclick="goDashboard()" disabled>Dashboard'a Gecis Yap</button>
       </div>
     </div>
   </div>
 
-  <!-- Screen: Ayarlar -->
+  <!-- Settings screen: redirect to wizard. All config moved to single source -->
   <div id="settingsScreen" class="screen" style="display:none;">
     <div class="screen-header">
       <h2 class="screen-title">Ayarlar</h2>
-      <p class="screen-subtitle">Baglanti ayarlarinizi yapilandirin. Detayli kurulum icin Kurulum Sihirbazi'ni kullanin.</p>
+      <p class="screen-subtitle">Tum ayarlar Kurulum Sihirbazi'nda toplandi. Asagidaki butona tikla.</p>
     </div>
-    <div class="settings-grid">
-
-      <div class="settings-card">
-        <div class="settings-card-header">
-          <div class="settings-card-icon" style="background:var(--accent-dim);color:var(--accent-light);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          </div>
-          <div>
-            <div class="settings-card-title">Tarayici (CDP)</div>
-            <div class="settings-card-desc">Chrome DevTools Protocol — Etsy/Pinterest otomasyonu icin gerekli</div>
-          </div>
-        </div>
-        <div class="settings-field">
-          <label>Hata Ayiklama Portu</label>
-          <input type="number" id="settingsCdpPort" value="9333" min="1000" max="65535">
-          <div class="field-hint">Varsayilan: 9333. Cakisma varsa degistir.</div>
-        </div>
-        <div class="settings-field">
-          <label>Tarayici Dosya Yolu <span style="opacity:0.5;font-weight:400;">(opsiyonel)</span></label>
-          <input type="text" id="settingsBrowserPath" placeholder="/Applications/Google Chrome.app/... veya C:/Users/.../chrome.exe">
-          <div class="field-hint">Bos birakilirsa otomatik algilama kullanilir.</div>
-        </div>
-      </div>
-
-      <div class="settings-card">
-        <div class="settings-card-header">
-          <div class="settings-card-icon" style="background:rgba(245,158,11,0.10);color:var(--amber);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-          </div>
-          <div>
-            <div class="settings-card-title">Etsy Hesabi</div>
-            <div class="settings-card-desc">CDP tarayici uzerinden otomatik giris icin cookie</div>
-          </div>
-          <span id="etsyStatus" style="margin-left:auto;font-size:0.65rem;padding:2px 10px;border-radius:9px;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.18);white-space:nowrap;flex-shrink:0;">Bagli Degil</span>
-        </div>
-        <div class="settings-field">
-          <label>Etsy Cookie Verisi</label>
-          <textarea id="settingsEtsyCookies" placeholder='Etsy.com cookie JSON...' rows="3" style="width:100%;padding:0.5rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--mono);font-size:0.65rem;resize:vertical"></textarea>
-          <div class="field-hint">
-            <b>Nasil alinir:</b> etsy.com'a giris yap → F12 → Console → asagidaki kodu yapistir → sonucu buraya yapistir:
-          </div>
-          <div style="margin-top:0.4rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.45rem 0.65rem;font-family:var(--mono);font-size:0.6rem;color:var(--accent-light);cursor:pointer;word-break:break-all;transition:color 0.2s;" onclick="navigator.clipboard.writeText(this.textContent);this.style.color='var(--green)';setTimeout(()=>this.style.color='var(--accent-light)',1500)" title="Tikla kopyala">
-            copy(JSON.stringify(document.cookie.split(';').map(c=>{let[n,...v]=c.trim().split('=');return{name:n,value:v.join('='),domain:'.etsy.com'}})))
-          </div>
-        </div>
-        <button class="btn-sm" style="margin-top:0.5rem" onclick="saveEtsyCookies()">Etsy Hesabi Bagla</button>
-      </div>
-
-      <div class="settings-card">
-        <div class="settings-card-header">
-          <div class="settings-card-icon" style="background:rgba(239,68,68,0.10);color:#fb7185;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
-          </div>
-          <div>
-            <div class="settings-card-title">Pinterest Hesabi</div>
-            <div class="settings-card-desc">Otomatik pin icin cookie verisi</div>
-          </div>
-          <span id="pinterestStatus" style="margin-left:auto;font-size:0.65rem;padding:2px 10px;border-radius:9px;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.18);white-space:nowrap;flex-shrink:0;">Bagli Degil</span>
-        </div>
-        <div class="settings-field">
-          <label>Pinterest Cookie Verisi</label>
-          <textarea id="settingsPinCookies" placeholder='Pinterest.com cookie JSON...' rows="3" style="width:100%;padding:0.5rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:var(--mono);font-size:0.65rem;resize:vertical"></textarea>
-          <div class="field-hint">Ayni kod, sadece domain'i <code style="font-family:var(--mono);background:var(--bg-input);padding:1px 4px;border-radius:3px;">.pinterest.com</code> olarak degistir.</div>
-          <div style="margin-top:0.4rem;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.45rem 0.65rem;font-family:var(--mono);font-size:0.6rem;color:var(--accent-light);cursor:pointer;word-break:break-all;transition:color 0.2s;" onclick="navigator.clipboard.writeText(this.textContent);this.style.color='var(--green)';setTimeout(()=>this.style.color='var(--accent-light)',1500)" title="Tikla kopyala">
-            copy(JSON.stringify(document.cookie.split(';').map(c=>{let[n,...v]=c.trim().split('=');return{name:n,value:v.join('='),domain:'.pinterest.com'}})))
-          </div>
-        </div>
-        <button class="btn-sm" style="margin-top:0.5rem" onclick="savePinterestCookies()">Pinterest Hesabi Bagla</button>
-      </div>
-
-    </div>
-    <div style="margin-top:1.25rem;display:flex;gap:0.75rem;align-items:center;">
-      <button class="btn-save-settings" onclick="saveSettings()">Ayarlari Kaydet</button>
-      <span id="settingsStatus" class="settings-status"></span>
+    <div style="padding:1.5rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;text-align:center;">
+      <p style="color:var(--text-mid);margin-bottom:1rem;">API anahtari, tarayici ayari, Etsy sablonu ve Alura kontrolu icin Kurulum Sihirbazi'ni kullan.</p>
+      <button class="btn-wizard-primary" onclick="showWizardScreen();updateSidebar('wizard');">Kurulum Sihirbazi'na Git</button>
     </div>
   </div>
 
@@ -3313,92 +3241,10 @@ window.updateSidebar = function(mode) {
     checkConnectionStatus();
   };
 
-  window.saveSettings = function() {
-    const settings = {
-      cdpPort: document.getElementById('settingsCdpPort').value.trim(),
-      browserPath: document.getElementById('settingsBrowserPath').value.trim(),
-    };
-    localStorage.setItem('etsy_creator_settings', JSON.stringify(settings));
-    const st = document.getElementById('settingsStatus');
-    st.textContent = 'Kaydedildi';
-    st.style.color = 'var(--green)';
-    setTimeout(() => { st.textContent = ''; }, 2500);
-  };
-
-  window.saveEtsyCookies = async function() {
-    const cookies = document.getElementById('settingsEtsyCookies').value.trim();
-    if (!cookies) { alert('Cookie alani bos'); return; }
-    try {
-      JSON.parse(cookies); // validate JSON
-      const resp = await fetch('/api/etsy-cookies', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cookies }),
-      });
-      const data = await resp.json();
-      if (!resp.ok) throw new Error(data.error);
-      const el = document.getElementById('etsyStatus');
-      el.textContent = 'Bagli';
-      el.style.background = 'rgba(34,197,94,0.1)';
-      el.style.color = '#22c55e';
-      el.style.borderColor = 'rgba(34,197,94,0.2)';
-      alert('Etsy hesabi basariyla baglandi!');
-    } catch (err) {
-      alert('Hata: ' + err.message);
-    }
-  };
-
-  window.savePinterestCookies = async function() {
-    const cookies = document.getElementById('settingsPinCookies').value.trim();
-    if (!cookies) { alert('Cookie alani bos'); return; }
-    try {
-      JSON.parse(cookies);
-      const resp = await fetch('/api/pinterest-cookies', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cookies }),
-      });
-      const data = await resp.json();
-      if (!resp.ok) throw new Error(data.error);
-      const el = document.getElementById('pinterestStatus');
-      el.textContent = 'Bagli';
-      el.style.background = 'rgba(34,197,94,0.1)';
-      el.style.color = '#22c55e';
-      el.style.borderColor = 'rgba(34,197,94,0.2)';
-      alert('Pinterest hesabi basariyla baglandi!');
-    } catch (err) {
-      alert('Hata: ' + err.message);
-    }
-  };
-
-  async function checkConnectionStatus() {
-    try {
-      const resp = await fetch('/api/cookie-status');
-      const data = await resp.json();
-      if (data.hasEtsy) {
-        const el = document.getElementById('etsyStatus');
-        el.textContent = 'Bagli';
-        el.style.background = 'rgba(34,197,94,0.1)';
-        el.style.color = '#22c55e';
-        el.style.borderColor = 'rgba(34,197,94,0.2)';
-      }
-      if (data.hasPinterest) {
-        const el = document.getElementById('pinterestStatus');
-        el.textContent = 'Bagli';
-        el.style.background = 'rgba(34,197,94,0.1)';
-        el.style.color = '#22c55e';
-        el.style.borderColor = 'rgba(34,197,94,0.2)';
-      }
-    } catch {}
-  }
-
-  function loadSettings() {
-    try {
-      const s = JSON.parse(localStorage.getItem('etsy_creator_settings') || '{}');
-      if (s.cdpPort) document.getElementById('settingsCdpPort').value = s.cdpPort;
-      if (s.browserPath) document.getElementById('settingsBrowserPath').value = s.browserPath;
-    } catch(e) {}
-  }
+  // saveSettings / saveEtsyCookies / savePinterestCookies / checkConnectionStatus / loadSettings
+  // removed - settings screen now redirects to wizard (single source of truth).
+  function checkConnectionStatus() { /* no-op: status shown via top banner */ }
+  function loadSettings() { /* no-op */ }
 
   window.selectMode = function(mode) {
     if (mode !== 'single' && mode !== 'bulk') mode = 'single';
