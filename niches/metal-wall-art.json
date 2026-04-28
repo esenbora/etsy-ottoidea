@@ -34,5 +34,19 @@
     "wash"
   ],
   "designPromptExtra": "Design must be a single-color flat silhouette suitable for laser or CNC cutting from sheet metal. Solid black on pure white background, no gradients, no shading, no text effects, no photographic detail. All shapes must be connected (no floating islands). Negative space cutouts allowed. Print-ready vector-style line work, 1:1 square unless reference dictates otherwise.",
-  "descriptionVoice": "warm, design-forward, emphasizes craftsmanship, finish options, mounting ease, indoor/outdoor durability, gift-worthiness; never references apparel, fabric, printing, or wash care"
+  "descriptionVoice": "warm, design-forward, emphasizes craftsmanship, finish options, mounting ease, indoor/outdoor durability, gift-worthiness; never references apparel, fabric, printing, or wash care",
+  "scenePool": [
+    "modern living room wall above a linen sofa, soft afternoon light, indoor plant",
+    "industrial loft brick wall with edison bulb pendant lighting and leather couch",
+    "scandinavian bedroom wall above a minimalist nightstand with brass lamp",
+    "rustic farmhouse entryway wall above a wooden bench, woven basket nearby",
+    "outdoor patio with stone wall, golden hour, climbing plants",
+    "modern dining room accent wall behind a wooden table with pendant light",
+    "home office wall behind a walnut desk, open books, warm task lamp",
+    "minimalist hallway with concrete wall and architectural shadow play",
+    "garden fence backdrop with weathered wood, daylight, climbing greenery",
+    "studio shot on warm cream wall, single hero product, dramatic side lighting",
+    "wide angle living room context with sectional sofa and area rug",
+    "close-up macro of laser-cut metal detail showing material texture and finish"
+  ]
 }

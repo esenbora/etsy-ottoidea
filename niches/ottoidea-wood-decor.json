@@ -73,5 +73,19 @@
   ],
   "shippingNote": "Ships from Turkey. Handling 1-3 business days. Tracked international shipping.",
   "skipDesignGeneration": true,
-  "uploadAsDesign": true
+  "uploadAsDesign": true,
+  "scenePool": [
+    "rustic farmhouse living room wall, warm afternoon sunlight, neutral linen sofa visible",
+    "cozy bedroom wall above a walnut nightstand, brass lamp glow, hardcover books",
+    "modern entryway with wooden console, woven basket, soft daylight",
+    "scandinavian hallway, light oak floor, minimalist coat rack and indoor plant",
+    "industrial loft brick wall, edison bulb pendant, leather bench in foreground",
+    "boho dining nook, dried pampas grass in vase, warm candle glow",
+    "kitchen wall above a butcher block counter, copper pots and herbs, golden hour",
+    "bathroom wall above a stone vanity, eucalyptus, soft spa lighting",
+    "home office wall behind walnut desk, open notebook, brass desk lamp",
+    "lifestyle close-up of the wooden product on a linen surface, golden hour macro detail",
+    "studio backdrop on warm cream wall, single hero product, soft directional light",
+    "wide angle showing full wall context with adjacent furniture and warm sunlight"
+  ]
 }

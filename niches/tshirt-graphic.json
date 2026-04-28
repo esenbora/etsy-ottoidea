@@ -42,5 +42,19 @@
     "poster"
   ],
   "designPromptExtra": "Design a print-ready graphic for a t-shirt chest placement. Bold flat colors, sharp edges, no gradients unless minimal, suitable for DTF or screen-print fabric printing. Transparent or solid background. No mockup, no shirt — just the artwork. Vector-style or high-res raster, square or vertical aspect, centered composition. No fabric texture, no garment context.",
-  "descriptionVoice": "playful, casual, friendly; emphasize fabric quality (Bella Canvas / Comfort Colors), unisex fit, soft hand-feel, durable print, sizing guide, gift-worthy presentation; never reference wall decor, frames, glass, or wood products"
+  "descriptionVoice": "playful, casual, friendly; emphasize fabric quality (Bella Canvas / Comfort Colors), unisex fit, soft hand-feel, durable print, sizing guide, gift-worthy presentation; never reference wall decor, frames, glass, or wood products",
+  "scenePool": [
+    "young person wearing the t-shirt, casual lifestyle, neutral urban background, natural daylight",
+    "flat lay on white wooden floor with sunglasses, sneakers, and a coffee cup",
+    "hung on a wooden hanger against a clean cream wall, soft window light",
+    "model walking outdoors in a city street, candid lifestyle, golden hour",
+    "folded neatly on a wooden bench with a leather backpack, minimal styling",
+    "close-up macro showing fabric texture and print quality detail",
+    "model laughing with friends in a coffee shop, lifestyle group shot",
+    "studio shot on a clean off-white backdrop with the shirt centered",
+    "flat lay on a linen bedsheet with morning coffee and an open book",
+    "model riding a skateboard outdoors, dynamic lifestyle, warm late afternoon",
+    "boutique style hung on a vintage clothing rack with plants in foreground",
+    "wooden mannequin against a brick wall, urban streetwear vibe"
+  ]
 }
