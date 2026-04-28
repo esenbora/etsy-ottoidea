@@ -679,6 +679,102 @@ textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent
   font-family: var(--mono);
 }
 
+.file-chip-thumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px 4px 4px;
+  border-radius: 8px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  margin: 4px 4px 0 0;
+  max-width: 220px;
+}
+.file-thumb-img {
+  width: 36px; height: 36px;
+  object-fit: cover;
+  border-radius: 6px;
+  cursor: zoom-in;
+  flex-shrink: 0;
+}
+.file-thumb-name {
+  font-size: 11px;
+  color: var(--text-mid);
+  font-family: var(--mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 130px;
+}
+.file-thumb-remove {
+  background: rgba(239,68,68,0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239,68,68,0.3);
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+.file-thumb-remove:hover { background: rgba(239,68,68,0.25); }
+
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  cursor: zoom-out;
+  backdrop-filter: blur(4px);
+}
+.lightbox-overlay.active { display: flex; }
+.lightbox-overlay img {
+  max-width: 100%;
+  max-height: 90vh;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lightbox-close:hover { background: rgba(255,255,255,0.2); }
+.lightbox-caption {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255,255,255,0.85);
+  font-size: 13px;
+  font-family: var(--mono);
+  background: rgba(0,0,0,0.5);
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+
+.image-card img { cursor: zoom-in; }
+
 .drop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
 .row { display: flex; gap: 0.75rem; }
 .row > * { flex: 1; }
@@ -3341,7 +3437,6 @@ window.updateSidebar = function(mode) {
   // ── Drop zone helper ──
   function setupDropZone(dropEl, inputEl, listEl, multi) {
     if (!dropEl || !inputEl || !listEl) return;
-    // Accumulated files for multi-mode (kept as plain Array of File)
     let accumulated = [];
 
     ['dragenter', 'dragover'].forEach(ev => {
@@ -3351,11 +3446,29 @@ window.updateSidebar = function(mode) {
       dropEl.addEventListener(ev, e => { e.preventDefault(); dropEl.classList.remove('dragover'); });
     });
 
-    function syncInput() {
+    function render() {
       const transfer = new DataTransfer();
       accumulated.forEach(f => transfer.items.add(f));
       inputEl.files = transfer.files;
-      showFiles(inputEl, listEl);
+      listEl.innerHTML = '';
+      accumulated.forEach((f, idx) => {
+        const chip = document.createElement('span');
+        chip.className = 'file-chip file-chip-thumb';
+        const thumbUrl = URL.createObjectURL(f);
+        chip.innerHTML = `<img src="${thumbUrl}" class="file-thumb-img"><span class="file-thumb-name">${f.name}</span><button type="button" class="file-thumb-remove" title="Kaldir" aria-label="Kaldir">&times;</button>`;
+        chip.querySelector('.file-thumb-remove').addEventListener('click', (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          URL.revokeObjectURL(thumbUrl);
+          accumulated.splice(idx, 1);
+          render();
+        });
+        // click thumbnail (not button) to preview full
+        chip.querySelector('.file-thumb-img').addEventListener('click', () => {
+          openLightbox(thumbUrl, f.name);
+        });
+        listEl.appendChild(chip);
+      });
     }
 
     dropEl.addEventListener('drop', e => {
@@ -3366,22 +3479,22 @@ window.updateSidebar = function(mode) {
       } else {
         accumulated = [dt.files[0]];
       }
-      syncInput();
+      render();
     });
 
     inputEl.addEventListener('change', () => {
       const newFiles = Array.from(inputEl.files);
       if (multi) {
         accumulated.push(...newFiles);
-        syncInput();
       } else {
         accumulated = newFiles;
-        showFiles(inputEl, listEl);
       }
+      render();
     });
   }
 
   function showFiles(inputEl, listEl) {
+    // legacy fallback (used by some bulk paths) — re-renders simple chips from current files
     listEl.innerHTML = '';
     Array.from(inputEl.files).forEach(f => {
       const chip = document.createElement('span');
@@ -3577,7 +3690,7 @@ window.updateSidebar = function(mode) {
     card.dataset.src = src;
     card.dataset.name = name;
     const t = Date.now();
-    let html = `<a href="${src}" target="_blank"><img src="${src}?t=${t}" loading="lazy"></a><div class="img-name">${name}</div>`;
+    let html = `<img src="${src}?t=${t}" loading="lazy" onclick="openLightbox(this.src.split('?')[0], '${name.replace(/'/g, "\\'")}')"><div class="img-name">${name}</div>`;
     if (opts?.mockupIndex !== undefined) {
       const tpl = opts.templatePath || '';
       html += `<div class="mockup-actions"><button class="btn-thumb" onclick="setThumbnail(this)" title="Thumbnail olarak sec">&#9733;</button><div class="regen-wrap"><button class="btn-regen" onclick="toggleRegenMenu(event, this)" data-index="${opts.mockupIndex}" data-template="${tpl}">&#8635; Yeniden</button><div class="regen-dropdown"><button onclick="regenerateMockup(${opts.mockupIndex}, this, {})">&#8635; Yeniden (Varsayilan)</button><button onclick="regenerateMockup(${opts.mockupIndex}, this, {scale:1.1})">&#8593; Daha Buyuk (+10%)</button><button onclick="regenerateMockup(${opts.mockupIndex}, this, {scale:0.9})">&#8595; Daha Kucuk (-10%)</button><button onclick="regenerateMockup(${opts.mockupIndex}, this, {whiteMode:true})">&#9634; Beyaz Yap</button><button onclick="regenerateMockup(${opts.mockupIndex}, this, {position:'chest'})">&#9652; Gogus Hizasi</button><button onclick="regenerateMockup(${opts.mockupIndex}, this, {position:'center'})">&#9670; Orta</button></div></div></div>`;
@@ -6721,6 +6834,33 @@ window.updateSidebar = function(mode) {
   setInterval(refreshStatusBanner, 60000);
 
 })();
+</script>
+
+<!-- Lightbox modal for full-size image preview -->
+<div id="lightbox" class="lightbox-overlay" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightbox(event)" aria-label="Kapat">&times;</button>
+  <img id="lightboxImg" src="" alt="">
+  <div class="lightbox-caption" id="lightboxCaption"></div>
+</div>
+<script>
+  window.openLightbox = function(src, caption) {
+    if (!src) return;
+    const lb = document.getElementById('lightbox');
+    const img = document.getElementById('lightboxImg');
+    const cap = document.getElementById('lightboxCaption');
+    img.src = src;
+    cap.textContent = caption || '';
+    lb.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  };
+  window.closeLightbox = function(ev) {
+    if (ev && ev.target && ev.target.tagName === 'IMG' && ev.target.id === 'lightboxImg') return;
+    document.getElementById('lightbox').classList.remove('active');
+    document.body.style.overflow = '';
+  };
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLightbox();
+  });
 </script>
 
 </body>
