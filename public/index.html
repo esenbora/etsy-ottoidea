@@ -4004,81 +4004,7 @@ window.updateSidebar = function(mode) {
 
   // clearAllPending defined in dashboard section below
 
-  window.addBulkRow = function() {
-    if (bulkRowCount >= 20) return;
-    bulkRowCount++;
-    const idx = bulkRowCount;
-    const container = document.getElementById('bulkRows');
-
-    const row = document.createElement('div');
-    row.className = 'bulk-row';
-    row.id = 'bulk-row-' + idx;
-    row.dataset.idx = idx;
-    row.innerHTML = `
-      <div class="bulk-row-header">
-        <span class="bulk-row-num">Ürün #${idx}</span>
-        <button type="button" class="bulk-row-remove" onclick="removeBulkRow(${idx})" title="Satırı sil">✕</button>
-      </div>
-      <div class="bulk-row-fields">
-        <div>
-          <div class="field-label">Tasarım</div>
-          <div class="bulk-drop-zone" id="bulkDesignDrop-${idx}">
-            <input type="file" id="bulkDesignFile-${idx}" accept="image/*">
-            <div class="dz-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
-            <div class="dz-label">Tasarım görseli</div>
-            <div class="dz-files" id="bulkDesignFiles-${idx}"></div>
-          </div>
-        </div>
-        <div>
-          <div class="field-label">Mockup Şablonları</div>
-          <div class="bulk-drop-zone" id="bulkMockupDrop-${idx}">
-            <input type="file" id="bulkMockupFile-${idx}" accept="image/*" multiple>
-            <div class="dz-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>
-            <div class="dz-label">Mockup (coklu)</div>
-            <div class="dz-files" id="bulkMockupFiles-${idx}"></div>
-          </div>
-        </div>
-        <div>
-          <div class="field-label">Rakip Etsy URL</div>
-          <input type="url" id="bulkCompetitor-${idx}" placeholder="https://www.etsy.com/listing/..." value="https://www.etsy.com/listing/4456120451" style="margin-top:0.3rem;">
-        </div>
-      </div>
-    `;
-    container.appendChild(row);
-
-    setupBulkDropZone(idx, 'Design', false);
-    setupBulkDropZone(idx, 'Mockup', true);
-    updateAddRowBtn();
-    renumberBulkRows();
-  };
-
-  function setupBulkDropZone(idx, type, multi) {
-    const dropEl = document.getElementById(`bulk${type}Drop-${idx}`);
-    const inputEl = document.getElementById(`bulk${type}File-${idx}`);
-    const listEl = document.getElementById(`bulk${type}Files-${idx}`);
-    setupDropZone(dropEl, inputEl, listEl, multi);
-  }
-
-  window.removeBulkRow = function(idx) {
-    const row = document.getElementById('bulk-row-' + idx);
-    if (row) row.remove();
-    renumberBulkRows();
-    updateAddRowBtn();
-  };
-
-  function renumberBulkRows() {
-    const rows = document.querySelectorAll('#bulkRows .bulk-row');
-    rows.forEach((row, i) => {
-      row.querySelector('.bulk-row-num').textContent = 'Ürün #' + (i + 1);
-    });
-  }
-
-  function updateAddRowBtn() {
-    const count = document.querySelectorAll('#bulkRows .bulk-row').length;
-    const btn = document.getElementById('btnAddRow');
-    btn.disabled = count >= 20;
-    btn.textContent = count >= 20 ? 'Maksimum 20 satır' : '+ Satır Ekle';
-  }
+  // (Removed dead bulk-row impl that targeted #bulkRows / #btnAddRow — superseded by #bulkItems impl below.)
 
   function addBulkLog(msg) {
     const logSection = document.getElementById('bulk-log-section');
@@ -5073,15 +4999,7 @@ window.updateSidebar = function(mode) {
   function escapeHtml(s) {
     return String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
   }
-
-  function addLog(msg) {
-    const logEl = document.getElementById('log');
-    if (!logEl) return;
-    const line = document.createElement('div');
-    line.textContent = msg;
-    logEl.appendChild(line);
-    logEl.scrollTop = logEl.scrollHeight;
-  }
+  // (duplicate addLog removed - canonical impl above)
 
   function createResultsBlock(title) {
     const block = document.createElement('div');
@@ -6024,9 +5942,7 @@ window.updateSidebar = function(mode) {
     }
   }
 
-  function escapeHtml(str) {
-    return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
+  // (duplicate escapeHtml removed - canonical impl above handles all 5 entities)
   function escapeAttr(str) {
     return (str || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
