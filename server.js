@@ -693,12 +693,13 @@ app.post('/api/create',
             send({ type: 'design', path: '/designs/' + found, name: found });
           }
         } catch {}
-      } else if (mode === 'copyrighted') {
+      } else if (mode === 'copyrighted' || niche.get().skipDesignGeneration || niche.get().uploadAsDesign) {
         const designExt = path.extname(refFile.originalname) || '.png';
         const designName = `${sku}_design${designExt}`;
         designPath = path.join(__dirname, 'designs', designName);
         fs.copyFileSync(refPath, designPath);
-        send({ type: 'step-done', step: 'generate', message: 'Tasarım hazır (orijinal kullanılıyor)' });
+        const reason = niche.get().skipDesignGeneration ? 'fiziksel ürün — tasarım üretimi atlandı' : 'orijinal kullanılıyor';
+        send({ type: 'step-done', step: 'generate', message: `Tasarım hazır (${reason})` });
         send({ type: 'design', path: '/designs/' + designName, name: designName });
       } else {
         send({ type: 'step-start', step: 'generate', message: 'Wiro ile tasarım üretiliyor (nano-banana-pro)...' });
@@ -750,6 +751,17 @@ app.post('/api/create',
         send({ type: 'log', message: 'Mockup adımı atlandı (devam)' });
       } else if (!shouldRun('mockup')) {
         send({ type: 'step-done', step: 'mockup', message: 'Mockup adımı atlandı' });
+      } else if (niche.get().skipDesignGeneration && mockupPaths.length === 0) {
+        // Wood / fiziksel ürün: mockup composition yok, urun fotosu zaten upload-ready
+        const finalName = `${sku}_final${path.extname(designPath)}`;
+        const finalPath = path.join(__dirname, 'output', finalName);
+        fs.mkdirSync(path.dirname(finalPath), { recursive: true });
+        fs.copyFileSync(designPath, finalPath);
+        mockupOutputs = [finalPath];
+        meta.mockupPaths = ['/output/' + finalName];
+        saveMeta();
+        send({ type: 'step-done', step: 'mockup', message: 'Urun fotosu hazir (mockup composition atlandi)' });
+        send({ type: 'mockup', path: '/output/' + finalName, name: finalName, templatePath: '' });
       } else if (mockupPaths.length > 0) {
         send({ type: 'step-start', step: 'mockup', message: 'Composing mockups...' });
         try {
@@ -1258,21 +1270,35 @@ app.post('/api/setup/save', (req, res) => {
     if (Object.keys(updates).length) writeEnvFile(updates);
 
     const { etsyTemplateListingId, productType } = req.body || {};
-    const cfgTouch = chromePath || cdpPort || etsyTemplateListingId || productType || typeof aluraInstalled === 'boolean';
+    const cfgTouch = chromePath || cdpPort || etsyTemplateListingId !== undefined || productType || typeof aluraInstalled === 'boolean';
     if (cfgTouch) {
       let cfg = {};
       try { cfg = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8')); } catch {}
       if (typeof chromePath === 'string' && chromePath.trim()) cfg.operaPath = chromePath.trim();
       if (cdpPort && /^\d{2,5}$/.test(String(cdpPort).trim())) cfg.cdpPort = parseInt(String(cdpPort).trim(), 10);
+
+      const currentSlug = typeof cfg.niche === 'string' ? cfg.niche : (cfg.niche?.preset || null);
+      cfg.nicheOverrides = cfg.nicheOverrides || {};
+      if (currentSlug) cfg.nicheOverrides[currentSlug] = cfg.nicheOverrides[currentSlug] || {};
+
       if (typeof etsyTemplateListingId === 'string') {
         const t = etsyTemplateListingId.trim();
-        if (!t) delete cfg.etsyTemplateListingId;
-        else if (/^\d{6,15}$/.test(t)) cfg.etsyTemplateListingId = t;
+        if (!t) {
+          delete cfg.etsyTemplateListingId;
+          if (currentSlug) delete cfg.nicheOverrides[currentSlug].templateListingId;
+        } else if (/^\d{6,15}$/.test(t)) {
+          cfg.etsyTemplateListingId = t;
+          if (currentSlug) cfg.nicheOverrides[currentSlug].templateListingId = t;
+        }
       }
       if (typeof productType === 'string' && productType.trim()) {
         cfg.activeProductType = productType.trim();
         const preset = { ...DEFAULT_PRODUCT_TYPES, ...(cfg.productTypes || {}) }[cfg.activeProductType];
         if (preset && preset.position) cfg.mockup = { ...preset.position };
+        if (currentSlug) {
+          cfg.nicheOverrides[currentSlug].activeProductType = cfg.activeProductType;
+          cfg.nicheOverrides[currentSlug].mockup = { ...cfg.mockup };
+        }
       }
       if (typeof aluraInstalled === 'boolean') cfg.aluraInstalled = aluraInstalled;
       fs.writeFileSync(CONFIG_PATH, JSON.stringify(cfg, null, 2));
@@ -1496,7 +1522,10 @@ app.get('/api/niches', (req, res) => {
   }
 });
 
-// Switch active niche (writes config.niche = preset slug + optional product type)
+// Switch active niche - applies per-niche overlay (templateListingId, activeProductType, mockup)
+// Stored under cfg.nicheOverrides[slug] = { templateListingId, activeProductType, mockup }
+// On switch: copy overlay to top-level so existing pipeline reads same fields.
+// On save (setup/save below): also write back to cfg.nicheOverrides[currentSlug].
 app.post('/api/niche/switch', (req, res) => {
   try {
     const { preset, activeProductType } = req.body || {};
@@ -1511,14 +1540,43 @@ app.post('/api/niche/switch', (req, res) => {
     }
     let cfg = {};
     try { cfg = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8')); } catch {}
+
+    // Save current niche state to overrides BEFORE switching (preserve per-niche values)
+    const prevSlug = typeof cfg.niche === 'string' ? cfg.niche : (cfg.niche?.preset || null);
+    if (prevSlug && prevSlug !== safe) {
+      cfg.nicheOverrides = cfg.nicheOverrides || {};
+      cfg.nicheOverrides[prevSlug] = {
+        templateListingId: cfg.etsyTemplateListingId || '',
+        activeProductType: cfg.activeProductType || '',
+        mockup: cfg.mockup ? { ...cfg.mockup } : null,
+      };
+    }
+
     cfg.niche = safe;
-    if (activeProductType && typeof activeProductType === 'string' && activeProductType.trim()) {
-      cfg.activeProductType = activeProductType.trim();
-      const preset = { ...DEFAULT_PRODUCT_TYPES, ...(cfg.productTypes || {}) }[cfg.activeProductType];
+
+    // Apply overlay for new niche if exists
+    const overlay = cfg.nicheOverrides?.[safe] || {};
+    if (overlay.templateListingId) cfg.etsyTemplateListingId = overlay.templateListingId;
+    else delete cfg.etsyTemplateListingId;
+
+    const productType = activeProductType && activeProductType.trim()
+      ? activeProductType.trim()
+      : (overlay.activeProductType || '');
+    if (productType) {
+      cfg.activeProductType = productType;
+      const preset = { ...DEFAULT_PRODUCT_TYPES, ...(cfg.productTypes || {}) }[productType];
       if (preset && preset.position) cfg.mockup = { ...preset.position };
     }
+    if (overlay.mockup) cfg.mockup = { ...overlay.mockup };
+
     fs.writeFileSync(CONFIG_PATH, JSON.stringify(cfg, null, 2));
-    res.json({ ok: true, active: safe, activeProductType: cfg.activeProductType });
+    res.json({
+      ok: true,
+      active: safe,
+      activeProductType: cfg.activeProductType,
+      templateListingId: cfg.etsyTemplateListingId || '',
+      mockup: cfg.mockup,
+    });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
