@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kurulum Sihirbazı — Ottoidea Etsy Product Creator</title>
+  <style>
+    :root {
+      --bg: #0a0a0c;
+      --panel: rgba(20,20,24,0.7);
+      --panel2: rgba(14,14,17,0.7);
+      --ink: #f5f5f5;
+      --text-mid: #a0a0a5;
+      --text-dim: #6a6a70;
+      --hair: rgba(255,255,255,0.08);
+      --hair-strong: rgba(255,255,255,0.16);
+      --brand: #10b981;
+      --brand-dark: #059669;
+      --brand-soft: rgba(16,185,129,0.12);
+      --brand-border: rgba(16,185,129,0.35);
+      --green: #10b981;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at top, rgba(16,185,129,0.06), transparent 60%), var(--bg);
+      color: var(--ink);
+      font-family: var(--font);
+      min-height: 100vh;
+      padding: 40px 20px;
+      line-height: 1.5;
+    }
+    .container { max-width: 780px; margin: 0 auto; }
+    h1 {
+      font-weight: 600;
+      font-size: 28px;
+      margin: 0 0 6px;
+      letter-spacing: -0.01em;
+    }
+    .subtitle { color: var(--text-mid); font-size: 14px; margin-bottom: 28px; }
+    .brand { color: var(--brand); font-weight: 600; }
+
+    .wizard-grid { display: grid; gap: 16px; }
+    .wizard-card {
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      border: 1px solid var(--hair);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: border-color 0.3s var(--ease);
+    }
+    .wizard-card.done { border-color: var(--brand-border); }
+    .wizard-step-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--hair);
+    }
+    .wizard-step-num {
+      width: 32px; height: 32px;
+      display: inline-flex;
+      align-items: center; justify-content: center;
+      border-radius: 50%;
+      font-family: var(--mono);
+      font-weight: 600;
+      font-size: 13px;
+      background: rgba(255,255,255,0.04);
+      color: var(--text-mid);
+      border: 1px solid var(--hair);
+      transition: all 0.3s var(--ease);
+    }
+    .wizard-step-num.done {
+      background: var(--brand);
+      color: #062518;
+      border-color: var(--brand);
+    }
+    .wizard-step-title { font-weight: 600; font-size: 17px; margin-bottom: 2px; }
+    .wizard-step-desc { font-size: 12.5px; color: var(--text-mid); }
+    .wizard-step-status {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 100px;
+      background: rgba(255,255,255,0.04);
+      color: var(--text-dim);
+      border: 1px solid var(--hair);
+    }
+    .wizard-step-status.ok { background: var(--brand-soft); color: var(--brand); border-color: var(--brand-border); }
+    .wizard-step-status.pending { background: rgba(245,158,11,0.06); color: var(--amber); border-color: rgba(245,158,11,0.18); }
+    .wizard-step-body { padding: 18px 22px 22px; }
+    .wizard-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-mid);
+      margin-bottom: 8px;
+    }
+    .wizard-label a {
+      font-family: var(--font);
+      text-transform: none;
+      letter-spacing: 0;
+      color: var(--brand);
+      text-decoration: none;
+      font-size: 12px;
+    }
+    .wizard-label a:hover { text-decoration: underline; }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 11px 14px;
+      background: rgba(5,5,7,0.55);
+      border: 1px solid var(--hair);
+      border-radius: 8px;
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+    input:focus {
+      border-color: var(--brand-border);
+      box-shadow: 0 0 0 3px var(--brand-soft);
+      outline: none;
+    }
+    .wizard-row { display: flex; gap: 8px; align-items: center; }
+    .wizard-row input { flex: 1; }
+    .wizard-actions { display: flex; gap: 10px; align-items: center; margin-top: 18px; flex-wrap: wrap; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 13px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(16,185,129,0.25), inset 0 1px 0 rgba(255,255,255,0.12);
+      transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(16,185,129,0.35); }
+    .btn-primary:disabled { background: rgba(255,255,255,0.05); color: var(--text-dim); box-shadow: none; cursor: not-allowed; }
+    .btn-ghost {
+      background: rgba(255,255,255,0.04);
+      color: var(--text-mid);
+      border: 1px solid var(--hair);
+      padding: 9px 14px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      cursor: pointer;
+      transition: all 0.2s var(--ease);
+    }
+    .btn-ghost:hover { border-color: var(--hair-strong); color: var(--ink); background: rgba(255,255,255,0.06); }
+    .saved { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; color: var(--text-dim); }
+    .saved.ok { color: var(--brand); }
+    .saved.err { color: var(--red); }
+    .login-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .login-item { padding: 14px; border-radius: 10px; background: rgba(5,5,7,0.4); border: 1px solid var(--hair); }
+    .login-label { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+    .login-state { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; color: var(--text-dim); }
+    .login-state.ok { color: var(--brand); }
+    .login-state.pending { color: var(--amber); }
+    .summary {
+      background: linear-gradient(180deg, rgba(24,24,28,0.6), rgba(14,14,17,0.6));
+      border: 1px solid var(--hair);
+      border-radius: 14px;
+      padding: 22px;
+    }
+    .summary-head { font-weight: 600; font-size: 18px; margin-bottom: 14px; }
+    .summary-grid { display: grid; gap: 6px; margin-bottom: 18px; }
+    .sum-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: rgba(5,5,7,0.35);
+      border: 1px solid var(--hair);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    .sum-row > span:first-child { color: var(--text-mid); }
+    .sum-row > span:last-child { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+    .sum-row.ok > span:last-child { color: var(--brand); }
+    .sum-row.miss > span:last-child { color: var(--red); }
+    .sum-row.pending > span:last-child { color: var(--amber); }
+    .summary-cta { width: 100%; padding: 12px; font-size: 14px; }
+    .hint { font-size: 11.5px; color: var(--text-dim); margin-top: 6px; line-height: 1.5; }
+    .hint b { color: var(--text-mid); font-weight: 500; }
+    .note {
+      margin-top: 16px;
+      padding: 12px 14px;
+      background: rgba(16,185,129,0.05);
+      border: 1px solid var(--brand-border);
+      border-radius: 10px;
+      font-size: 12px;
+      color: var(--text-mid);
+    }
+    .note b { color: var(--ink); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1><span class="brand">Ottoidea</span> Kurulum Sihirbazı</h1>
+    <p class="subtitle">Sistemi 3 adımda hazırla. Her şey yerel — bilgiler sadece bu makinede saklanır.</p>
+
+    <div class="wizard-grid">
+
+      <!-- Step 1: API keys -->
+      <div class="wizard-card" id="cardKeys">
+        <div class="wizard-step-row">
+          <span class="wizard-step-num" id="numKeys">1</span>
+          <div>
+            <div class="wizard-step-title">API Anahtarları</div>
+            <div class="wizard-step-desc">Tasarım üretimi (Gemini veya Wiro) ve SEO (OpenRouter) için gerekli.</div>
+          </div>
+          <span class="wizard-step-status" id="statusKeys">bekliyor</span>
+        </div>
+        <div class="wizard-step-body">
+          <label class="wizard-label">
+            <span>Gemini API Key</span>
+            <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio →</a>
+          </label>
+          <input type="password" id="geminiKey" placeholder="AIza..." autocomplete="off" spellcheck="false">
+
+          <label class="wizard-label" style="margin-top:14px;">
+            <span>WIRO API Key <em style="text-transform:none;letter-spacing:0;color:var(--text-dim);font-style:normal">(opsiyonel, alternatif)</em></span>
+            <a href="https://wiro.ai/" target="_blank" rel="noopener">wiro.ai →</a>
+          </label>
+          <input type="password" id="wiroKey" placeholder="wiro_..." autocomplete="off" spellcheck="false">
+
+          <label class="wizard-label" style="margin-top:14px;">
+            <span>OpenRouter API Key</span>
+            <a href="https://openrouter.ai/keys" target="_blank" rel="noopener">openrouter.ai →</a>
+          </label>
+          <input type="password" id="openrouterKey" placeholder="sk-or-..." autocomplete="off" spellcheck="false">
+
+          <div class="hint">Gemini <b>veya</b> WIRO yeterli (ikisi birden zorunlu değil). OpenRouter zorunlu.</div>
+
+          <div class="wizard-actions">
+            <button class="btn-primary" onclick="saveKeys()">Kaydet</button>
+            <span class="saved" id="keysMsg"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Chrome path -->
+      <div class="wizard-card" id="cardChrome">
+        <div class="wizard-step-row">
+          <span class="wizard-step-num" id="numChrome">2</span>
+          <div>
+            <div class="wizard-step-title">Tarayıcı (CDP)</div>
+            <div class="wizard-step-desc">Etsy ve Pinterest yüklemesi için gerçek Chrome gerekir. Otomatik algılanır.</div>
+          </div>
+          <span class="wizard-step-status" id="statusChrome">bekliyor</span>
+        </div>
+        <div class="wizard-step-body">
+          <label class="wizard-label"><span>Chrome / Edge / Brave yolu</span></label>
+          <div class="wizard-row">
+            <input type="text" id="chromePath" placeholder="/Applications/Google Chrome.app/..." spellcheck="false">
+            <button class="btn-ghost" onclick="detectChrome()">Otomatik Algıla</button>
+          </div>
+
+          <label class="wizard-label" style="margin-top:14px;"><span>CDP Port</span></label>
+          <input type="text" id="cdpPort" placeholder="9335" style="max-width:120px;">
+
+          <div class="wizard-actions">
+            <button class="btn-primary" onclick="saveChrome()">Kaydet</button>
+            <span class="saved" id="chromeMsg"></span>
+          </div>
+          <div class="hint">Kaydettikten sonra terminalde: <b>npm run browser</b> ile ayrı profilde Chrome açılır.</div>
+        </div>
+      </div>
+
+      <!-- Step 3: Login status -->
+      <div class="wizard-card" id="cardLogin">
+        <div class="wizard-step-row">
+          <span class="wizard-step-num" id="numLogin">3</span>
+          <div>
+            <div class="wizard-step-title">Etsy &amp; Pinterest Girişi</div>
+            <div class="wizard-step-desc">Açılan Chrome penceresinde etsy.com ve pinterest.com'a giriş yap. Bir kez yeterli — oturum kalıcı.</div>
+          </div>
+          <span class="wizard-step-status" id="statusLogin">bekliyor</span>
+        </div>
+        <div class="wizard-step-body">
+          <div class="login-grid">
+            <div class="login-item">
+              <div class="login-label">Etsy</div>
+              <div class="login-state" id="etsyState">giriş yapılmadı</div>
+            </div>
+            <div class="login-item">
+              <div class="login-label">Pinterest</div>
+              <div class="login-state" id="pinState">giriş yapılmadı</div>
+            </div>
+          </div>
+          <div class="wizard-actions">
+            <button class="btn-ghost" onclick="refreshStatus()">Durumu Yenile</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="summary" id="summary">
+        <div class="summary-head">Sistem Durumu</div>
+        <div class="summary-grid" id="summaryGrid"></div>
+        <button class="btn-primary summary-cta" id="goBtn" onclick="goDashboard()" disabled>Dashboard'a Git</button>
+        <div class="note" id="readyNote" style="display:none;">
+          <b>Hazır!</b> Gerekli tüm alanlar dolu. Chrome'u <b>npm run browser</b> ile aç, etsy/pinterest'e giriş yap, sonra Dashboard'a geç.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentStatus = null;
+
+    async function refreshStatus() {
+      try {
+        const r = await fetch('/api/setup/status');
+        const s = await r.json();
+        currentStatus = s;
+        applyStatus(s);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function setStep(cardId, numId, statusId, ok) {
+      document.getElementById(cardId).classList.toggle('done', ok);
+      document.getElementById(numId).classList.toggle('done', ok);
+      const st = document.getElementById(statusId);
+      st.textContent = ok ? 'tamam' : 'bekliyor';
+      st.classList.toggle('ok', ok);
+      st.classList.toggle('pending', !ok);
+    }
+
+    function applyStatus(s) {
+      const c = s.checks;
+
+      // Prefill inputs with masked values
+      if (s.env.GEMINI_API_KEY) document.getElementById('geminiKey').placeholder = s.env.GEMINI_API_KEY;
+      if (s.env.WIRO_API_KEY) document.getElementById('wiroKey').placeholder = s.env.WIRO_API_KEY;
+      if (s.env.OPENROUTER_API_KEY) document.getElementById('openrouterKey').placeholder = s.env.OPENROUTER_API_KEY;
+      if (c.chromePathValue) document.getElementById('chromePath').value = c.chromePathValue;
+      if (c.cdpPort) document.getElementById('cdpPort').value = c.cdpPort;
+
+      const keysOk = (c.geminiKey || c.wiroKey) && c.openrouterKey;
+      setStep('cardKeys', 'numKeys', 'statusKeys', keysOk);
+      setStep('cardChrome', 'numChrome', 'statusChrome', c.chromePath);
+      setStep('cardLogin', 'numLogin', 'statusLogin', c.etsyLoggedIn && c.pinterestLoggedIn);
+
+      // Login details
+      const eState = document.getElementById('etsyState');
+      eState.textContent = c.etsyLoggedIn ? 'giriş yapılmış' : 'giriş yapılmadı';
+      eState.className = 'login-state ' + (c.etsyLoggedIn ? 'ok' : 'pending');
+      const pState = document.getElementById('pinState');
+      pState.textContent = c.pinterestLoggedIn ? 'giriş yapılmış' : 'giriş yapılmadı';
+      pState.className = 'login-state ' + (c.pinterestLoggedIn ? 'ok' : 'pending');
+
+      // Summary
+      const rows = [
+        ['Gemini API Key', c.geminiKey, 'opt'],
+        ['WIRO API Key', c.wiroKey, 'opt'],
+        ['OpenRouter API Key', c.openrouterKey, 'req'],
+        ['Chrome yolu', c.chromePath, 'req'],
+        ['CDP çalışıyor', c.cdpRunning, 'opt'],
+        ['Etsy girişi', c.etsyLoggedIn, 'opt'],
+        ['Pinterest girişi', c.pinterestLoggedIn, 'opt'],
+        ['Niş', !!c.niche, 'opt', c.niche || '-'],
+      ];
+      const grid = document.getElementById('summaryGrid');
+      grid.innerHTML = rows.map(([label, ok, kind, valueStr]) => {
+        const cls = ok ? 'ok' : (kind === 'req' ? 'miss' : 'pending');
+        const val = ok ? (valueStr || 'tamam') : (kind === 'req' ? 'eksik' : 'beklemede');
+        return `<div class="sum-row ${cls}"><span>${label}</span><span>${val}</span></div>`;
+      }).join('');
+
+      const ready = s.ready;
+      document.getElementById('goBtn').disabled = !ready;
+      document.getElementById('readyNote').style.display = ready ? 'block' : 'none';
+    }
+
+    async function saveKeys() {
+      const body = {
+        geminiKey: document.getElementById('geminiKey').value,
+        wiroKey: document.getElementById('wiroKey').value,
+        openrouterKey: document.getElementById('openrouterKey').value,
+      };
+      const msg = document.getElementById('keysMsg');
+      try {
+        const r = await fetch('/api/setup/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        if (!r.ok) throw new Error('save failed');
+        msg.textContent = 'kaydedildi';
+        msg.className = 'saved ok';
+        document.getElementById('geminiKey').value = '';
+        document.getElementById('wiroKey').value = '';
+        document.getElementById('openrouterKey').value = '';
+        await refreshStatus();
+      } catch (e) {
+        msg.textContent = 'hata: ' + e.message;
+        msg.className = 'saved err';
+      }
+    }
+
+    async function detectChrome() {
+      try {
+        const r = await fetch('/api/setup/detect-chrome', { method: 'POST' });
+        const j = await r.json();
+        if (j.found) {
+          document.getElementById('chromePath').value = j.found;
+        } else {
+          alert('Chrome otomatik bulunamadı. Lütfen yolu elle gir.');
+        }
+      } catch (e) {
+        alert('Hata: ' + e.message);
+      }
+    }
+
+    async function saveChrome() {
+      const body = {
+        chromePath: document.getElementById('chromePath').value,
+        cdpPort: document.getElementById('cdpPort').value,
+      };
+      const msg = document.getElementById('chromeMsg');
+      try {
+        const r = await fetch('/api/setup/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        if (!r.ok) throw new Error('save failed');
+        msg.textContent = 'kaydedildi';
+        msg.className = 'saved ok';
+        await refreshStatus();
+      } catch (e) {
+        msg.textContent = 'hata: ' + e.message;
+        msg.className = 'saved err';
+      }
+    }
+
+    function goDashboard() {
+      window.location.href = '/?setup=done';
+    }
+
+    refreshStatus();
+    setInterval(refreshStatus, 5000);
+  </script>
+</body>
+</html>

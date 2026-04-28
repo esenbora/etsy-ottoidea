@@ -1,0 +1,75 @@
+{
+  "category": "handmade solid wood wall decor and functional home accents",
+  "style": "rustic modern, natural wood grain, geometric (zig-zag, hexagon), minimalist Scandinavian + farmhouse, warm earth tones, pine and walnut finishes, clean laser-cut or hand-assembled joinery, wall-mounted",
+  "targetAudience": "home decor lovers, housewarming and wedding gift buyers, wine enthusiasts, farmhouse and cabin style fans, rustic interior collectors, Etsy handmade buyers in US/UK/EU",
+  "priceHint": "$35-$180",
+  "keywordSeed": [
+    "wood wall decor",
+    "handmade wine rack",
+    "wall mounted wine rack",
+    "rustic home decor",
+    "wooden bath caddy",
+    "bathtub tray",
+    "deer head wall art",
+    "farmhouse wall decor",
+    "geometric wood art",
+    "walnut wall decor",
+    "pine wood rack",
+    "housewarming gift",
+    "solid wood shelf",
+    "modern rustic decor",
+    "handmade wood gift"
+  ],
+  "bannedWords": [
+    "comfort colors",
+    "ikea",
+    "west elm",
+    "wayfair",
+    "pottery barn",
+    "crate and barrel",
+    "disney",
+    "nike",
+    "marvel",
+    "printable",
+    "digital download",
+    "poster",
+    "canvas print",
+    "tshirt",
+    "t-shirt",
+    "sweatshirt",
+    "hoodie",
+    "mug",
+    "sticker"
+  ],
+  "productTypes": [
+    "wine rack",
+    "bath caddy tray",
+    "wall shelf",
+    "animal head wall decor",
+    "photo frame",
+    "key holder",
+    "coat rack",
+    "floating shelf"
+  ],
+  "materials": {
+    "primary": ["solid pine (kiln-dried, sanded)", "solid walnut (ceviz)"],
+    "finish": ["food-safe non-toxic stain", "natural oil", "matte lacquer"],
+    "hardware": "mounting screws and wall anchors included"
+  },
+  "brand": {
+    "name": "Ottoidea",
+    "origin": "Handcrafted in Turkey",
+    "skuPatternHint": "NW* for pine racks, WBC* for bath caddies, codes embed model"
+  },
+  "designPromptExtra": "Design a product mockup or photography-ready rendering of a physical wall-mounted solid wood decor item. Natural wood grain visible. Clean background (light neutral wall, or lifestyle scene). No text overlay, no graphic-art style, no printable-art composition. Must look like a real handmade wooden product, NOT a print or poster.",
+  "descriptionVoice": "warm, artisanal, detail-focused, emphasizes handmade craft, wood species, non-toxic finish, mounting ease, care instructions, and giftability. Short punchy bullets, no emoji abuse, confident tone.",
+  "mustMention": [
+    "100% handmade",
+    "kiln-dried sanded wood",
+    "non-toxic colorants and glues",
+    "mounting hardware included",
+    "wood is a living material — minor variations, knots, cracks are natural",
+    "care: wipe with damp cloth, no chemicals"
+  ],
+  "shippingNote": "Ships from Turkey. Handling 1-3 business days. Tracked international shipping."
+}

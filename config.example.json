@@ -1,0 +1,21 @@
+{
+  "mockup": {
+    "x": 280,
+    "y": 350,
+    "width": 400,
+    "height": 500
+  },
+  "keepPhotoIndexes": [],
+  "keepPhotoCount": 6,
+  "operaPath": "C:/path/to/your/browser.exe",
+  "cdpPort": 9335,
+  "userDataDir": "",
+  "niche": "ottoidea-wood-decor",
+  "activeProductType": "wallart",
+  "brand": {
+    "name": "Ottoidea",
+    "primary": "#10b981",
+    "accent": "#3b82f6",
+    "logoUrl": ""
+  }
+}

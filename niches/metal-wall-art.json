@@ -1,0 +1,38 @@
+{
+  "category": "metal wall art panels and decorative metal signs",
+  "productType": "metal wall art",
+  "style": "laser-cut metal silhouette, powder-coated finish, sharp negative-space cutouts, layered shadow on the wall, modern minimalist or rustic farmhouse, suitable for laser/CNC fabrication",
+  "targetAudience": "homeowners decorating living rooms/bedrooms/entryways, housewarming and wedding gift buyers, farmhouse and modern decor fans, outdoor patio/garden decorators",
+  "priceHint": "$29-$149 depending on size and finish",
+  "sizes": ["12 inch", "18 inch", "24 inch", "36 inch", "48 inch"],
+  "finishes": ["matte black", "satin white", "antique copper", "brushed silver", "rustic bronze", "raw steel"],
+  "materials": ["16-gauge cold rolled steel", "powder-coated finish", "rust-resistant clear coat"],
+  "keywordSeed": [
+    "metal wall art",
+    "metal wall decor",
+    "laser cut metal",
+    "outdoor metal art",
+    "farmhouse metal",
+    "modern metal art",
+    "powder coated art",
+    "steel wall art",
+    "above bed wall art",
+    "living room decor",
+    "housewarming gift",
+    "custom metal sign"
+  ],
+  "bannedWords": [
+    "comfort colors",
+    "tee",
+    "t-shirt",
+    "tshirt",
+    "sweatshirt",
+    "hoodie",
+    "DTF",
+    "Gildan",
+    "fabric",
+    "wash"
+  ],
+  "designPromptExtra": "Design must be a single-color flat silhouette suitable for laser or CNC cutting from sheet metal. Solid black on pure white background, no gradients, no shading, no text effects, no photographic detail. All shapes must be connected (no floating islands). Negative space cutouts allowed. Print-ready vector-style line work, 1:1 square unless reference dictates otherwise.",
+  "descriptionVoice": "warm, design-forward, emphasizes craftsmanship, finish options, mounting ease, indoor/outdoor durability, gift-worthiness; never references apparel, fabric, printing, or wash care"
+}
