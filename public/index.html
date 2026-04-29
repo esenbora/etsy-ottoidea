@@ -724,6 +724,65 @@ textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent
 }
 .file-thumb-remove:hover { background: rgba(239,68,68,0.25); }
 
+.theme-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.theme-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  background: var(--bg-input, rgba(255,255,255,0.03));
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.theme-row select {
+  flex: 1;
+  padding: 6px 8px;
+  background: var(--bg-input, rgba(255,255,255,0.04));
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.theme-row input[type="number"] {
+  width: 64px;
+  padding: 6px 8px;
+  background: var(--bg-input, rgba(255,255,255,0.04));
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 0.78rem;
+  text-align: center;
+}
+.theme-row .theme-row-remove {
+  background: rgba(239,68,68,0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239,68,68,0.3);
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.theme-row .theme-row-remove:hover { background: rgba(239,68,68,0.25); }
+.theme-total {
+  display: inline-block;
+  background: var(--accent-dim, rgba(14,165,233,0.15));
+  color: var(--accent-light, #38bdf8);
+  padding: 1px 8px;
+  border-radius: 9px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  margin-left: 6px;
+}
+
 .lightbox-overlay {
   position: fixed;
   inset: 0;
@@ -2604,10 +2663,20 @@ input[type="number"]:focus, input[type="url"]:focus, textarea:focus, select:focu
                 <input type="text" id="sku" placeholder="Otomatik oluşturulur">
               </div>
               <div>
-                <div class="field-label">Mockup Sayısı</div>
-                <input type="number" id="mockupCount" value="10" min="1" max="20">
+                <div class="field-label">Toplam Mockup <span class="theme-total" id="themeTotal">0</span></div>
+                <input type="number" id="mockupCount" value="10" min="1" max="40" style="display:none">
+                <div style="font-size:0.7rem;color:var(--text-dim);">Asagidaki tema secicisinden adet belirle</div>
               </div>
             </div>
+
+            <div class="form-section-label" style="margin-top:1rem;">Mockup Temalari</div>
+            <div class="theme-picker" id="themePicker"></div>
+            <div style="display:flex;gap:0.5rem;margin-top:0.5rem;">
+              <button type="button" class="btn-sm" id="btnAddTheme">+ Tema Ekle</button>
+              <button type="button" class="btn-sm" id="btnPresetMix">Onerilen Karisim</button>
+              <button type="button" class="btn-sm" id="btnClearThemes">Temizle</button>
+            </div>
+
             <div style="margin-top:0.75rem;">
               <div class="field-label">Rakip Etsy Link <span style="font-weight:300;opacity:0.35">(opsiyonel — etiketleri buradan çeker)</span></div>
               <input type="text" id="competitorUrl" placeholder="https://www.etsy.com/listing/...">
@@ -4811,7 +4880,7 @@ window.updateSidebar = function(mode) {
   }
 
   // ══════════════ Lifestyle Mockup flow ══════════════
-  async function runLifestyleStream({ file, files, description, count, sku, competitorUrl, onEvent }) {
+  async function runLifestyleStream({ file, files, description, count, sku, competitorUrl, themes, onEvent }) {
     const fd = new FormData();
     const fileArr = files || (file ? [file] : []);
     fileArr.forEach(f => fd.append('product', f));
@@ -4819,6 +4888,7 @@ window.updateSidebar = function(mode) {
     fd.append('count', String(count));
     if (sku) fd.append('sku', sku);
     if (competitorUrl) fd.append('competitorUrl', competitorUrl);
+    if (Array.isArray(themes) && themes.length) fd.append('themes', JSON.stringify(themes));
 
     const resp = await fetch('/api/lifestyle-mockup', { method: 'POST', body: fd });
     if (!resp.ok || !resp.body) throw new Error('Request failed: ' + resp.status);
@@ -5184,6 +5254,101 @@ window.updateSidebar = function(mode) {
     if (e.target && e.target.id === 'btnAddBulk') window.addBulkRow();
   });
 
+  // ── Mockup tema secici ──
+  let _themePresets = null;
+  async function loadThemePresets() {
+    if (_themePresets) return _themePresets;
+    try {
+      const r = await fetch('/api/mockup-themes');
+      const d = await r.json();
+      _themePresets = d.presets || [];
+    } catch { _themePresets = []; }
+    return _themePresets;
+  }
+
+  function renderThemePicker() {
+    const wrap = document.getElementById('themePicker');
+    if (!wrap) return;
+    const rows = wrap.querySelectorAll('.theme-row');
+    let total = 0;
+    rows.forEach(r => { total += parseInt(r.querySelector('input[type=number]').value, 10) || 0; });
+    const totalEl = document.getElementById('themeTotal');
+    if (totalEl) totalEl.textContent = total;
+    const hidden = document.getElementById('mockupCount');
+    if (hidden) hidden.value = total || 1;
+  }
+
+  async function addThemeRow(initial) {
+    const presets = await loadThemePresets();
+    const wrap = document.getElementById('themePicker');
+    if (!wrap) return;
+    const row = document.createElement('div');
+    row.className = 'theme-row';
+    const sel = document.createElement('select');
+    presets.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.key;
+      opt.textContent = p.label;
+      sel.appendChild(opt);
+    });
+    if (initial?.theme) sel.value = initial.theme;
+    const num = document.createElement('input');
+    num.type = 'number';
+    num.min = '1'; num.max = '20';
+    num.value = String(initial?.count ?? 2);
+    num.addEventListener('input', renderThemePicker);
+    const rm = document.createElement('button');
+    rm.type = 'button';
+    rm.className = 'theme-row-remove';
+    rm.title = 'Kaldir';
+    rm.textContent = '×';
+    rm.addEventListener('click', () => { row.remove(); renderThemePicker(); });
+    row.appendChild(sel);
+    row.appendChild(num);
+    row.appendChild(rm);
+    wrap.appendChild(row);
+    renderThemePicker();
+  }
+
+  function getThemes() {
+    const rows = document.querySelectorAll('#themePicker .theme-row');
+    const themes = [];
+    rows.forEach(r => {
+      const theme = r.querySelector('select').value;
+      const count = parseInt(r.querySelector('input[type=number]').value, 10) || 0;
+      if (theme && count > 0) themes.push({ theme, count });
+    });
+    return themes;
+  }
+  window.getThemes = getThemes;
+
+  document.addEventListener('click', (e) => {
+    if (e.target && e.target.id === 'btnAddTheme') { addThemeRow(); }
+    if (e.target && e.target.id === 'btnPresetMix') {
+      document.getElementById('themePicker').innerHTML = '';
+      [
+        { theme: 'living_room',  count: 2 },
+        { theme: 'bedroom',      count: 2 },
+        { theme: 'studio_white', count: 3 },
+        { theme: 'macro_detail', count: 1 },
+        { theme: 'in_use',       count: 2 },
+      ].forEach(t => addThemeRow(t));
+    }
+    if (e.target && e.target.id === 'btnClearThemes') {
+      document.getElementById('themePicker').innerHTML = '';
+      renderThemePicker();
+    }
+  });
+
+  // Init: 2 default rows
+  (async function initThemes() {
+    await loadThemePresets();
+    if (!document.querySelector('#themePicker .theme-row')) {
+      await addThemeRow({ theme: 'living_room', count: 5 });
+      await addThemeRow({ theme: 'studio_white', count: 5 });
+    }
+  })();
+
   // ── Submit handler ──
   document.getElementById('createForm').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -5229,8 +5394,9 @@ window.updateSidebar = function(mode) {
     let done = 0;
 
     try {
+      const themes = (typeof window.getThemes === 'function') ? window.getThemes() : null;
       await runLifestyleStream({
-        files, description, count, sku, competitorUrl,
+        files, description, count, sku, competitorUrl, themes,
         onEvent: (d) => {
           if (d.type === 'sku') addLog('SKU: ' + d.sku);
           else if (d.type === 'log') addLog(d.message);
@@ -5324,8 +5490,9 @@ window.updateSidebar = function(mode) {
 
       let total = count;
       try {
+        const themes = (typeof window.getThemes === 'function') ? window.getThemes() : null;
         await runLifestyleStream({
-          file: j.file, description: j.desc, count,
+          file: j.file, description: j.desc, count, themes,
           onEvent: (d) => {
             if (d.type === 'sku') addLog(`[#${i + 1}] SKU: ` + d.sku);
             else if (d.type === 'log') addLog(`[#${i + 1}] ` + d.message);

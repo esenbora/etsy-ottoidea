@@ -158,6 +158,17 @@ app.post('/api/cdp-launch', (req, res) => {
   }, 3000);
 });
 
+// List of theme presets for the UI mockup theme picker
+app.get('/api/mockup-themes', (req, res) => {
+  try {
+    const { THEME_PRESETS } = require('./lib/lifestyle-mockup');
+    const presets = Object.entries(THEME_PRESETS).map(([key, def]) => ({ key, label: def.label }));
+    res.json({ presets });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ── Lifestyle Mockup (new simplified flow) ──
 app.post('/api/lifestyle-mockup',
   upload.array('product', 10),
@@ -181,6 +192,21 @@ app.post('/api/lifestyle-mockup',
     const countRaw = parseInt(req.body.count, 10);
     const count = Math.min(Math.max(Number.isFinite(countRaw) ? countRaw : 10, 1), 20);
 
+    let themes = null;
+    try {
+      const raw = req.body.themes;
+      if (raw) {
+        const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        if (Array.isArray(parsed) && parsed.length) {
+          themes = parsed
+            .map(t => ({ theme: String(t.theme || '').trim(), count: Math.max(0, Math.min(20, parseInt(t.count, 10) || 0)) }))
+            .filter(t => t.theme && t.count > 0);
+        }
+      }
+    } catch (e) {
+      console.warn('[lifestyle-mockup] themes parse failed:', e.message);
+    }
+
     if (productFiles.length === 0) { send({ type: 'error', message: 'Ürün fotoğrafı eksik' }); return res.end(); }
     if (!description) { send({ type: 'error', message: 'Ürün açıklaması eksik' }); return res.end(); }
 
@@ -190,7 +216,11 @@ app.post('/api/lifestyle-mockup',
     const competitorUrl = (req.body.competitorUrl || '').toString().trim();
 
     send({ type: 'sku', sku });
-    send({ type: 'log', message: `Ürün: ${description} | ${productPaths.length} foto | ${count} mockup üretilecek` });
+    const totalPlanned = themes ? themes.reduce((s, t) => s + t.count, 0) : count;
+    const planMsg = themes
+      ? `Tema spec: ${themes.map(t => `${t.count}x ${t.theme}`).join(', ')} = ${totalPlanned} mockup`
+      : `${count} mockup`;
+    send({ type: 'log', message: `Ürün: ${description} | ${productPaths.length} foto | ${planMsg}` });
 
     try {
       const { outputs, concepts } = await generateLifestyleMockups({
@@ -198,6 +228,7 @@ app.post('/api/lifestyle-mockup',
         productDescription: description,
         sku,
         count,
+        themes,
         onProgress: send,
       });
 
